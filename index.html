@@ -5,6 +5,40 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>QR 코드 단축기 - BTeacher</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+        import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyCwyolDeQYIuFOat4_0f1NzLMGIC1K7l4Q",
+            authDomain: "qrcode-shortener.firebaseapp.com",
+            projectId: "qrcode-shortener",
+            storageBucket: "qrcode-shortener.appspot.com",
+            messagingSenderId: "238027678088",
+            appId: "1:238027678088:web:716b8511fb9a43bee09a3d",
+            measurementId: "G-N5DLWKKXBM"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        async function shortenUrl() {
+            let url = document.getElementById('originalUrl').value;
+            if (!url) {
+                alert('URL을 입력하세요!');
+                return;
+            }
+            let shortCode = Math.random().toString(36).substr(2, 6);
+            await addDoc(collection(db, "urls"), { shortCode, url });
+
+            let shortUrl = `https://bteacher.link/${shortCode}`;
+            document.getElementById('shortUrl').innerHTML = `<a href="${shortUrl}" target="_blank">${shortUrl}</a>`;
+
+            document.getElementById('qrcode').innerHTML = "";
+            new QRCode(document.getElementById('qrcode'), shortUrl);
+        }
+        window.shortenUrl = shortenUrl;
+    </script>
     <style>
         body { 
             font-family: Arial, sans-serif; 
@@ -29,20 +63,5 @@
     <button onclick="shortenUrl()">단축하기</button>
     <p id="shortUrl"></p>
     <div id="qrcode"></div>
-
-    <script>
-        function shortenUrl() {
-            let url = document.getElementById('originalUrl').value;
-            if (!url) {
-                alert('URL을 입력하세요!');
-                return;
-            }
-            let shortUrl = `https://bteacher.link/${btoa(url).slice(0, 6)}`;
-            document.getElementById('shortUrl').innerHTML = `<a href="${shortUrl}" target="_blank">${shortUrl}</a>`;
-            
-            document.getElementById('qrcode').innerHTML = "";
-            new QRCode(document.getElementById('qrcode'), shortUrl);
-        }
-    </script>
 </body>
 </html>
